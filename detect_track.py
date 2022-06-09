@@ -122,19 +122,28 @@ cap = cv2.VideoCapture(0)
 
 while True:
     _, frame = cap.read()
-    canny_img = canny(frame)
-    cropped_iamge = region_of_interest(canny_img)
 
-    # cv2.HoughLinesP(image, precision_pixel_count, precision_in_radians, threshold_for_bin, empty_np_array)
-    lines = cv2.HoughLinesP(cropped_iamge, 2, np.pi/180, 100, np.array([]), minLineLength=MIN_TRACK_LEN, maxLineGap=5)
-    # avg_lines = average_slope_intercept(frame, lines)
-    line_image = display_track(frame, lines)
+    try:
+        canny_img = canny(frame)
+        cropped_iamge = region_of_interest(canny_img)
 
-    # combine lanes drawn and the original image
-    resulting_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
+        # cv2.HoughLinesP(image, precision_pixel_count, precision_in_radians, threshold_for_bin, empty_np_array)
+        lines = cv2.HoughLinesP(cropped_iamge, 2, np.pi/180, 100, np.array([]), minLineLength=MIN_TRACK_LEN, maxLineGap=5)
+        
+        try:
+            avg_lines = average_slope_intercept(frame, lines)
+            line_image = display_track(frame, avg_lines)
+        except:
+            line_image = display_track(frame, lines)
 
-    cv2.imshow('Test Image', resulting_image)
-    cv2.imshow('Computer Vision Gradient', canny_img)
+        # combine lanes drawn and the original image
+        resulting_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
+
+        cv2.imshow('Test Image', resulting_image)
+        cv2.imshow('Computer Vision Gradient', canny_img)
+    except Exception as e:
+        print(e)
+        continue
 
     # pl.imshow(combo_image)
     # pl.show()
